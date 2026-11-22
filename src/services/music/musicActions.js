@@ -14,7 +14,6 @@ import {
 } from './musicEmbeds.js';
 import { refreshPlayerMessage } from './playerHandler.js';
 
-const YOUTUBE_URL_PATTERN = /(?:youtube\.com|youtu\.be)/i;
 const PLAYER_CONNECT_TIMEOUT_MS = 12_000;
 
 function getConnectedLavalinkNodes(client) {
@@ -196,14 +195,6 @@ export async function joinVoiceChannel(client, interaction) {
 }
 
 export async function playQuery(client, interaction, query) {
-    if (YOUTUBE_URL_PATTERN.test(query)) {
-        throw new TitanBotError(
-            'YouTube URL blocked',
-            ErrorTypes.USER_INPUT,
-            'YouTube links are not supported. Try a song name instead.',
-        );
-    }
-
     const { player, guildData } = await ensurePlayer(client, interaction);
 
     const result = await client.riffy.resolve({
@@ -507,6 +498,24 @@ export async function clearQueue(client, interaction) {
     player.queue.clear();
     await refreshPlayerMessage(client, interaction.guild.id);
     return successEmbed('Queue Cleared', 'All queued tracks were removed.');
+}
+
+export async function setAutoplay(client, interaction, enabled) {
+    const player = getPlayer(client, interaction.guild.id);
+    if (player) {
+        assertCanControl(interaction.member, player);
+    }
+
+    const guildData = getGuildMusicData(interaction.guild.id);
+    guildData.autoplay = Boolean(enabled);
+    await refreshPlayerMessage(client, interaction.guild.id);
+
+    return successEmbed(
+        'Autoplay Updated',
+        enabled
+            ? 'Autoplay is enabled. When the queue ends, the player will ask Lavalink for related music if the active source supports it.'
+            : 'Autoplay is disabled. Playback will stop when the queue ends.',
+    );
 }
 
 export async function setTwentyFourSeven(client, interaction, enabled) {

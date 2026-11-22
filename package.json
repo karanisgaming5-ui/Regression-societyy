@@ -1,7 +1,7 @@
 {
-  "name": "titanbot",
+  "name": "regression-society-bot",
   "version": "2.1.0",
-  "description": "Modular Ultimate Community Bot by Touchpoint Support",
+  "description": "Regression Society \u2014 modular Discord community and server management bot",
   "main": "src/app.js",
   "type": "module",
   "scripts": {

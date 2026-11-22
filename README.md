@@ -1,6 +1,6 @@
-# TitanBot - Ultimate Discord Bot
+# Regression Society - Ultimate Discord Bot
 
-**TitanBot** is a powerful, feature-rich Discord bot designed to enhance your server experience with comprehensive moderation tools, engaging economy systems, utility features, and much more. Built with modern Discord.js v14 and PostgreSQL for optimal performance and data persistence.
+**Regression Society** is a powerful, feature-rich Discord bot designed to enhance your server experience with comprehensive moderation tools, engaging economy systems, utility features, and much more. Built with modern Discord.js v14 and PostgreSQL for optimal performance and data persistence.
 
 [![Support Server](https://img.shields.io/badge/-Support%20Server-%235865F2?logo=discord&logoColor=white&style=flat-square&logoWidth=20)](https://discord.gg/8kJBYhTGW9)
 [![Discord.js](https://img.shields.io/npm/v/discord.js?style=flat-square&labelColor=%23202225&color=%23202225&logo=npm&logoColor=white&logoWidth=20)](https://www.npmjs.com/package/discord.js)
@@ -18,7 +18,7 @@
 <a name="features-overview"></a>
 ## Features Overview
 
-TitanBot offers a complete suite of tools for Discord server management and community engagement:
+Regression Society offers a complete suite of tools for Discord server management and community engagement:
 
 <table>
 <tr>
@@ -57,10 +57,18 @@ TitanBot offers a complete suite of tools for Discord server management and comm
 </td>
 <td width="50%" valign="top">
 
+### Starboard
+- Configurable destination channel, reaction threshold, and Unicode emoji
+- Optional self-star counting and bot-message filtering
+- Automatically creates and updates featured posts as reactions change
+- Removes a featured post if it falls below the threshold or its source is deleted
+- Per-message update queue prevents rapid reactions from being lost
+- Setup: `/starboard setup` with a channel and threshold; inspect with `/starboard status`; disable with `/starboard disable`
+
 ### Leveling & XP System
 - **XP Tracking** - Automatic message-based XP
 - **Level Roles** - Auto-assign roles by level
-- **Custom Configuration** - Personalize leveling
+- **Custom Configuration** - Personalize leveling (only the actual Discord server owner can configure leveling or manually add, remove, or set XP/levels; Administrator and Manage Server permissions do not bypass this)
 
 ### Giveaways & Events
 - **Multiple Winners** - Support multi-winner giveaways
@@ -96,11 +104,11 @@ TitanBot offers a complete suite of tools for Discord server management and comm
 
 ### Video Tutorial
 For a detailed step-by-step setup guide, watch our comprehensive video tutorial:
-[**TitanBot Setup Tutorial**](https://www.youtube.com/@TouchDisc)
+[**Regression Society Setup Tutorial**](https://www.youtube.com/@TouchDisc)
 
 ## Docker Deployment (Recommended)
 
-TitanBot is fully containerized for easy deployment.
+Regression Society is fully containerized for easy deployment.
 
 1. **Clone the repository:**
    ```bash
@@ -145,10 +153,10 @@ Music uses [Lavalink v4](https://github.com/lavalink-devs/Lavalink) via [Riffy](
 
 ### Using GitHub Container Registry
 
-The bot is automatically published to GitHub Container Registry on every push to main.
+The upstream project image is available for the original TitanBot release. For this Regression Society build, build the image from this source checkout with `docker compose build`.
 
 ```bash
-docker pull ghcr.io/codebymitch/titanbot:main
+docker compose build
 ```
 
 <a name="manual-installation-steps"></a>
@@ -194,7 +202,7 @@ docker pull ghcr.io/codebymitch/titanbot:main
    - `NODE_ENV=production`
    - `LOG_LEVEL=warn` for a clean production console (critical issues + startup status)
    - `LOG_LEVEL=info` if you want more detailed operational logs
-   - If your chosen `PORT` is already used, TitanBot automatically tries the next port(s)
+   - If your chosen `PORT` is already used, Regression Society automatically tries the next port(s)
 
    Environment options reference:
    - `NODE_ENV`: `development`, `production`, `test` (any non-`production` value is treated as non-production)
@@ -249,7 +257,7 @@ Notes:
 <a name="bot-intents"></a>
 
 ## Required Bot Intents
-TitanBot requires the following Discord intents:
+Regression Society requires the following Discord intents:
 - **Guilds**
 - **Guild Messages**
 - **Message Content**
@@ -277,10 +285,10 @@ TitanBot requires the following Discord intents:
 
 ## License
 
-TitanBot is released under the MIT License. See [LICENSE](LICENSE) for details.
+Regression Society is released under the MIT License. See [LICENSE](LICENSE) for details.
 
 ## Thank You
 
-Thank you for choosing TitanBot for your Discord server! We're constantly working to improve and add new features based on community feedback.
+Thank you for choosing Regression Society for your Discord server! We're constantly working to improve and add new features based on community feedback.
 
 *Last updated: May 2026*

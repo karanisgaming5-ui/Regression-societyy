@@ -6,6 +6,7 @@ import {
 } from "discord.js";
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { createEmbed } from "../../utils/embeds.js";
+import { logger } from '../../utils/logger.js';
 import {
     createSelectMenu,
 } from "../../utils/components.js";
@@ -24,8 +25,8 @@ const HELP_MENU_TIMEOUT_MS = 5 * 60 * 1000;
 const CATEGORY_ICONS = {
     Core: "ℹ️",
     Moderation: "🛡️",
-    Economy: "💰",
     Music: "🎵",
+    Community: "👥",
     Fun: "🎮",
     Leveling: "📊",
     Utility: "🔧",
@@ -36,15 +37,15 @@ const CATEGORY_ICONS = {
     Tools: "🛠️",
     Search: "🔍",
     "Reaction Roles": "🎭",
-    Community: "👥",
-    Birthday: "🎂",
     "Join To Create": "🔌",
+    "Server Stats": "📈",
+    Starboard: "⭐",
     Verification: "✅",
 };
 
 function formatCategoryName(rawCategory) {
     return rawCategory
-        .replace(/_/g, '')
+        .replace(/_/g, ' ')
         .replace(/([a-z])([A-Z])/g, '$1 $2')
         .replace(/\b\w/g, (char) => char.toUpperCase());
 }

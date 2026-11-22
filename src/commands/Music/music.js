@@ -13,6 +13,7 @@ import {
     moveInQueue,
     clearQueue,
     setTwentyFourSeven,
+    setAutoplay,
     leaveVoiceChannel,
     replyMusicSuccess,
 } from '../../services/music/musicActions.js';
@@ -97,6 +98,14 @@ export default {
         )
         .addSubcommand((sub) =>
             sub
+                .setName('autoplay')
+                .setDescription('Play related music automatically when the queue ends')
+                .addBooleanOption((opt) =>
+                    opt.setName('enabled').setDescription('Enable or disable autoplay').setRequired(true),
+                ),
+        )
+        .addSubcommand((sub) =>
+            sub
                 .setName('247')
                 .setDescription('Toggle 24/7 mode (stay in voice channel when idle)')
                 .addBooleanOption((opt) =>
@@ -171,6 +180,11 @@ export default {
             }
             case 'leave': {
                 const embed = await leaveVoiceChannel(client, interaction);
+                await replyMusicSuccess(interaction, embed);
+                break;
+            }
+            case 'autoplay': {
+                const embed = await setAutoplay(client, interaction, interaction.options.getBoolean('enabled'));
                 await replyMusicSuccess(interaction, embed);
                 break;
             }

@@ -1,6 +1,6 @@
 {
   "name": "regression-society-bot",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Regression Society \u2014 modular Discord community and server management bot",
   "main": "src/app.js",
   "type": "module",

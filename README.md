@@ -1,6 +1,6 @@
 # Regression Society - Ultimate Discord Bot
 
-**Regression Society** is a powerful, feature-rich Discord bot designed to enhance your server experience with comprehensive moderation tools, engaging economy systems, utility features, and much more. Built with modern Discord.js v14 and PostgreSQL for optimal performance and data persistence.
+**Regression Society** is a powerful, feature-rich Discord bot designed to enhance your server experience with comprehensive moderation tools, music playback, server utilities, and community features. Built with modern Discord.js v14 and PostgreSQL for optimal performance and data persistence.
 
 [![Support Server](https://img.shields.io/badge/-Support%20Server-%235865F2?logo=discord&logoColor=white&style=flat-square&logoWidth=20)](https://discord.gg/8kJBYhTGW9)
 [![Discord.js](https://img.shields.io/npm/v/discord.js?style=flat-square&labelColor=%23202225&color=%23202225&logo=npm&logoColor=white&logoWidth=20)](https://www.npmjs.com/package/discord.js)
@@ -28,11 +28,6 @@ Regression Society offers a complete suite of tools for Discord server managemen
 - **Mass Actions** - Bulk ban/kick capabilities
 - **User Notes** - Keep detailed moderation records
 - **Case Management** - View and track all mod actions
-
-### Economy System
-- **Shop & Inventory** - Buy and manage items
-- **Gambling** - Risk it for rewards
-- **Pay System** - Transfer money between users
 
 ### Fun & Entertainment
 - **Random Facts** - Learn something new
@@ -75,11 +70,6 @@ Regression Society offers a complete suite of tools for Discord server managemen
 - **Auto Picking** - Automatic winner selection
 - **Reroll System** - Pick new winners if needed
 
-### Birthday System
-- **Birthday Tracking** - Never miss a birthday
-- **Auto Announcements** - Celebrate automatically
-- **Timezone Support** - Accurate worldwide tracking
-
 ### Utility Tools
 - **Report System** - Report issues to staff
 - **Todo Lists** - Personal task management
@@ -93,7 +83,9 @@ Regression Society offers a complete suite of tools for Discord server managemen
 ### Music
 - **24/7 Mode** - Play music 24/7
 - **Interative Button System** - Manage music through buttons
-- **Supports EVERY platform** - Supports spotify, deezer, youtube, apple music
+- **Search and playback** - Queue songs by title or supported URL through the configured Lavalink sources
+- **Personal library** - Save favorites in PostgreSQL and play them again with `/library`
+- **Playback controls** - Pause, resume, skip, loop, shuffle, volume, seek, queue, and autoplay
   
 </td>
 </tr>
@@ -149,7 +141,7 @@ Music uses [Lavalink v4](https://github.com/lavalink-devs/Lavalink) via [Riffy](
    ```
    Remove or rename `lavalink/nodes.json` so the bot falls back to those env vars.
 3. Override nodes inline with `LAVALINK_NODES` (JSON array) or point at another file with `LAVALINK_NODES_FILE`.
-4. Use `/play <song>` from a voice channel, or `/join` to connect without playing. Prefix shortcuts: `join`, `np`, `leave`, `pause`, `resume`, `skip`, `stop`, `volume <0-100>`, or `music <subcommand>`. Use `/nowplaying` and `/queue` for status; `/music` for loop, shuffle, seek, and other controls.
+4. Use `/play query:<song>` from a voice channel, or `/join` to connect without playing. Use `/nowplaying` and `/queue` for status, `/music` for pause/resume/skip/loop/shuffle/volume/seek/autoplay, and `/library` to save, browse, and replay your personal favorites. Direct links and music sources work only when the connected Lavalink node has the matching source enabled.
 
 ### Using GitHub Container Registry
 
@@ -226,7 +218,7 @@ Slash commands are registered **globally** on startup (via `CLIENT_ID`), so the 
 
 Notes:
 - Global slash commands may take up to about an hour to propagate on first deploy
-- Each server has **isolated** data: config, economy, tickets, leveling, dashboards, warnings, etc. (all keys are scoped as `guild:{guildId}:...`)
+- Each server has **isolated** data: config, tickets, leveling, dashboards, warnings, music libraries, etc. (all keys are scoped as `guild:{guildId}:...`)
 - In the [Discord Developer Portal](https://discord.com/developers/applications), ensure your bot is not restricted to a single guild if you plan to invite it elsewhere
 - Generate an OAuth2 invite URL from the [Discord Developer Portal](https://discord.com/developers/applications) (OAuth2 → URL Generator, scopes: `bot` and `applications.commands`)
 

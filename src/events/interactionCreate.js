@@ -1,4 +1,4 @@
-import { Events, MessageFlags } from 'discord.js';
+import { Events, MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { logger } from '../utils/logger.js';
 import { getGuildConfig } from '../services/config/guildConfig.js';
 import {
@@ -186,56 +186,7 @@ export default {
 
           const focusedOption = interaction.options.getFocused(true);
           
-          if (interaction.commandName === 'apply' && focusedOption.name === 'application') {
-            try {
-              const { getApplicationRoles } = await import('../utils/database.js');
-              const roles = await getApplicationRoles(client, interaction.guildId);
-              const roleName = interaction.options.getString('application', false);
-
-              const filtered = roles.filter(role =>
-                role.enabled !== false && 
-                role.name.toLowerCase().startsWith(roleName?.toLowerCase() || '')
-              );
-              
-              await interaction.respond(
-                filtered.slice(0, 25).map(role => ({
-                  name: `${role.name}${role.enabled === false ? ' (disabled)' : ''}`,
-                  value: role.name
-                }))
-              );
-            } catch (error) {
-              logger.error('Error handling autocomplete:', {
-                error: error.message,
-                guildId: interaction.guildId,
-                commandName: interaction.commandName
-              });
-              await interaction.respond([]);
-            }
-          } else if (interaction.commandName === 'app-admin' && focusedOption.name === 'application') {
-            try {
-              const { getApplicationRoles } = await import('../utils/database.js');
-              const roles = await getApplicationRoles(client, interaction.guildId);
-              const appName = interaction.options.getString('application', false);
-
-              const filtered = roles.filter(role =>
-                role.name.toLowerCase().startsWith(appName?.toLowerCase() || '')
-              );
-              
-              await interaction.respond(
-                filtered.slice(0, 25).map(role => ({
-                  name: `${role.name}${role.enabled === false ? ' (disabled)' : ''}`,
-                  value: role.name
-                }))
-              );
-            } catch (error) {
-              logger.error('Error handling app-admin autocomplete:', {
-                error: error.message,
-                guildId: interaction.guildId,
-                commandName: interaction.commandName
-              });
-              await interaction.respond([]);
-            }
-          } else if (interaction.commandName === 'reactroles' && focusedOption.name === 'panel') {
+          if (interaction.commandName === 'reactroles' && focusedOption.name === 'panel') {
             try {
               const { getAllReactionRoleMessages, deleteReactionRoleMessage } = await import('../services/reactionRoleService.js');
               const guildId = interaction.guildId;
@@ -307,6 +258,33 @@ export default {
             }
           }
         } else if (interaction.isButton()) {
+          if (interaction.customId === 'rs_panel_ticket') {
+            if (!interaction.guild) return interaction.reply({ content: 'This panel only works inside a server.', ephemeral: true });
+            await interaction.deferReply({ ephemeral: true });
+            try {
+              const member = await interaction.guild.members.fetch(interaction.user.id);
+              const { createTicket } = await import('../services/ticket.js');
+              const result = await createTicket(interaction.guild, member, null, 'Created from the server ticket panel');
+              return interaction.editReply({ content: `Your ticket is ready: ${result.channel}` });
+            } catch (error) {
+              return interaction.editReply({ content: error?.userMessage || error?.message || 'I could not create your ticket. Please contact a moderator.' });
+            }
+          }
+          if (interaction.customId.startsWith('rs_panel_role:')) {
+            const roleId = interaction.customId.split(':')[1];
+            const role = await interaction.guild?.roles.fetch(roleId).catch(() => null);
+            const botMember = interaction.guild ? (interaction.guild.members.me || await interaction.guild.members.fetchMe().catch(() => null)) : null;
+            if (!role || !botMember?.permissions.has(PermissionFlagsBits.ManageRoles) || role.managed || role.id === interaction.guild.id || role.position >= botMember.roles.highest.position) {
+              return interaction.reply({ content: 'That role is no longer available for self-assignment.', ephemeral: true });
+            }
+            const member = await interaction.guild.members.fetch(interaction.user.id);
+            if (member.roles.cache.has(role.id)) {
+              await member.roles.remove(role, 'Regression Society self-service role panel');
+              return interaction.reply({ content: `Removed ${role} from your roles.`, ephemeral: true });
+            }
+            await member.roles.add(role, 'Regression Society self-service role panel');
+            return interaction.reply({ content: `Added ${role} to your roles.`, ephemeral: true });
+          }
           if (interaction.customId.startsWith('shared_todo_')) {
             const parts = interaction.customId.split('_');
             const buttonType = parts.slice(0, 3).join('_');
@@ -399,8 +377,7 @@ export default {
           }
 
           if (
-            interaction.customId.startsWith('app_review_')
-            || interaction.customId.startsWith('jtc_')
+            interaction.customId.startsWith('jtc_')
             || interaction.customId.startsWith('config_wizard_modal:')
             || interaction.customId.startsWith('log_dash_channel_modal:')
             || interaction.customId.startsWith('log_dash_filter_modal:')

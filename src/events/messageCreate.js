@@ -12,12 +12,7 @@ import { getCommandPrefix, getBotMessage, isBotOwner, isCommandCategoryEnabled, 
 import { enforceAbuseProtection, formatCooldownDuration } from '../utils/abuseProtection.js';
 import { createEmbed } from '../utils/embeds.js';
 import { isCommandEnabled } from '../services/commandAccessService.js';
-import {
-  getCountingGameConfig,
-  saveCountingGameConfig,
-  isValidCountingMessage,
-  recordCorrectCount,
-} from '../services/countingGameService.js';
+import { refreshStickyNote } from '../services/stickyService.js';
 
 const MESSAGE_XP_RATE_LIMIT_ATTEMPTS = 12;
 const MESSAGE_XP_RATE_LIMIT_WINDOW_MS = 10000;
@@ -30,13 +25,8 @@ export default {
 
       logger.debug(`Message received from ${message.author.tag}: ${message.content}`);
 
-      const countingProcessed = await handleCountingGame(message, client);
-      if (countingProcessed) {
-        return;
-      }
-
       await handlePrefixCommand(message, client);
-
+      await refreshStickyNote(message, client).catch(error => logger.warn('Sticky note refresh failed:', error));
       await handleLeveling(message, client);
     } catch (error) {
       logger.error('Error in messageCreate event:', error);
@@ -143,42 +133,6 @@ async function handlePrefixCommand(message, client) {
     await executePrefixCommand(command, message, args, client, prefix, guildConfig);
   } catch (error) {
     logger.error('Error handling prefix command:', error);
-  }
-}
-
-async function handleCountingGame(message, client) {
-  try {
-    const config = await getCountingGameConfig(client, message.guild.id);
-    if (!config.enabled || !config.channelId || message.channel.id !== config.channelId) {
-      return false;
-    }
-
-    const content = message.content.trim();
-    const validCount = isValidCountingMessage(content, config);
-    const invalidAttempt = !validCount || message.author.id === config.lastUserId;
-
-    if (invalidAttempt) {
-      await message.delete().catch(() => {});
-      await saveCountingGameConfig(client, message.guild.id, {
-        ...config,
-        nextNumber: 1,
-        lastUserId: null,
-        currentStreak: 0,
-      });
-
-      const failureMessage = await message.channel.send(`❌ Count broken by <@${message.author.id}>. The sequence has been reset to **1**.`);
-      setTimeout(() => {
-        failureMessage.delete().catch(() => {});
-      }, 10000);
-
-      return true;
-    }
-
-    await recordCorrectCount(client, message.guild.id, message.author.id);
-    return true;
-  } catch (error) {
-    logger.error('Error handling counting game:', error);
-    return false;
   }
 }
 

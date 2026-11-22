@@ -59,7 +59,7 @@ export const helpBugReportButton = {
             color: 'error'
         });
         bugReportEmbed.setFooter({
-            text: 'TitanBot Bug Reporting System',
+            text: 'Regression Society Bug Reporting System',
             iconURL: client.user.displayAvatarURL()
         });
         bugReportEmbed.setTimestamp();

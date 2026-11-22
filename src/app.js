@@ -1,5 +1,5 @@
-﻿import 'dotenv/config';
-import { Client, Collection, GatewayIntentBits } from 'discord.js';
+import 'dotenv/config';
+import { Client, Collection, GatewayIntentBits, Partials } from 'discord.js';
 import { REST } from '@discordjs/rest';
 import express from 'express';
 import cron from 'node-cron';
@@ -9,7 +9,6 @@ import { initializeDatabase } from './utils/database.js';
 import { getGuildConfig } from './services/config/guildConfig.js';
 import { getServerCounters, saveServerCounters, updateCounter } from './services/serverstatsService.js';
 import { logger, startupLog, shutdownLog } from './utils/logger.js';
-import { checkBirthdays } from './services/birthdayService.js';
 import { checkGiveaways } from './services/giveawayService.js';
 import { loadCommands, registerCommands as registerSlashCommands } from './handlers/loaders/commandLoader.js';
 import { runSafeTask, handleTaskError, ErrorCodes } from './utils/errorHandler.js';
@@ -18,9 +17,10 @@ import { shutdownMusic } from './services/music/playerHandler.js';
 import pkg from '../package.json' with { type: 'json' };
 import { EXPECTED_SCHEMA_VERSION, EXPECTED_SCHEMA_LABEL } from './config/database/schemaVersion.js';
 
-class TitanBot extends Client {
+class RegressionSocietyBot extends Client {
   constructor() {
     super({
+      partials: [Partials.Channel, Partials.Message, Partials.Reaction, Partials.User],
       intents: [
         
         GatewayIntentBits.Guilds,                        
@@ -50,7 +50,7 @@ class TitanBot extends Client {
 
   async start() {
     try {
-      startupLog('Starting TitanBot...');
+      startupLog('Starting Regression Society...');
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       startupLog('Initializing database...');
@@ -204,7 +204,7 @@ class TitanBot extends Client {
 
     app.get('/', (req, res) => {
       res.status(200).json({ 
-        message: 'TitanBot System Online',
+        message: 'Regression Society System Online',
         version: pkg.version,
         timestamp: new Date().toISOString()
       });
@@ -248,7 +248,6 @@ class TitanBot extends Client {
   }
 
   setupCronJobs() {
-    cron.schedule('0 6 * * *', runSafeTask('birthday_check', () => checkBirthdays(this)));
     cron.schedule('* * * * *', runSafeTask('giveaway_check', () => checkGiveaways(this)));
     cron.schedule('*/15 * * * *', runSafeTask('counter_update', () => this.updateAllCounters()));
   }
@@ -323,11 +322,11 @@ class TitanBot extends Client {
   }
 
   async registerCommands() {
-    try {
-      await registerSlashCommands(this, { clientId: this.config.bot.clientId });
-    } catch (error) {
-      logger.error('Error registering commands:', error);
-    }
+    // Do not swallow registration failures. Discord can reject the entire
+    // command payload (for example, because one command has invalid metadata).
+    // Previously the error was logged and startup still printed that command
+    // registration had completed, leaving the bot online with stale commands.
+    return registerSlashCommands(this, { clientId: this.config.bot.clientId });
   }
 
   async shutdown(reason = 'UNKNOWN') {
@@ -388,7 +387,7 @@ class TitanBot extends Client {
 }
 
 try {
-  const bot = new TitanBot();
+  const bot = new RegressionSocietyBot();
   
   const setupShutdown = () => {
     process.on('SIGTERM', () => bot.shutdown('SIGTERM'));
@@ -428,4 +427,4 @@ try {
   process.exit(1);
 }
 
-export default TitanBot;
+export default RegressionSocietyBot;

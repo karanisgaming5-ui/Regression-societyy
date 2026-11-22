@@ -1,11 +1,11 @@
-import { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, MessageFlags } from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder, MessageFlags } from 'discord.js';
 import { logger } from '../../utils/logger.js';
 import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
-import { checkUserPermissions } from '../../utils/permissionGuard.js';
 import { removeLevels, getUserLevelData, getLevelingConfig } from '../../services/leveling/leveling.js';
 import { createEmbed } from '../../utils/embeds.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { requireServerOwner } from '../../utils/serverOwnerGuard.js';
 export default {
   data: new SlashCommandBuilder()
     .setName('levelremove')
@@ -23,19 +23,13 @@ export default {
         .setRequired(true)
         .setMinValue(1)
     )
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+    .setDefaultMemberPermissions(null)
     .setDMPermission(false),
   category: 'Leveling',
 
   async execute(interaction, config, client) {
+    if (!(await requireServerOwner(interaction))) return;
     await InteractionHelper.safeDefer(interaction);
-
-    const hasPermission = await checkUserPermissions(
-      interaction,
-      PermissionFlagsBits.ManageGuild,
-      'You need ManageGuild permission to use this command.'
-    );
-    if (!hasPermission) return;
 
     const levelingConfig = await getLevelingConfig(client, interaction.guildId);
     if (!levelingConfig?.enabled) {

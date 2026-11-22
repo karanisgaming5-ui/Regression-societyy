@@ -1,10 +1,11 @@
 import { getColor } from '../../config/bot.js';
-import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, MessageFlags } from 'discord.js';
+import { SlashCommandBuilder, ChannelType, MessageFlags } from 'discord.js';
 import { createEmbed } from '../../utils/embeds.js';
 import { getLevelingConfig, saveLevelingConfig } from '../../services/leveling/leveling.js';
 import { botHasPermission } from '../../utils/permissionGuard.js';
 import { TitanBotError, ErrorTypes, replyUserError } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { requireServerOwner } from '../../utils/serverOwnerGuard.js';
 import { logger } from '../../utils/logger.js';
 import levelDashboard from './modules/level_dashboard.js';
 
@@ -12,7 +13,7 @@ export default {
     data: new SlashCommandBuilder()
         .setName('level')
         .setDescription('Manage the leveling system')
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+        .setDefaultMemberPermissions(null)
         .setDMPermission(false)
         .addSubcommand((subcommand) =>
             subcommand
@@ -67,14 +68,11 @@ export default {
     category: 'Leveling',
 
     async execute(interaction, config, client) {
+        if (!(await requireServerOwner(interaction))) return;
         const deferred = await InteractionHelper.safeDefer(interaction, {
             flags: MessageFlags.Ephemeral,
         });
         if (!deferred) return;
-
-        if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-            return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need the **Manage Server** permission to use this command.' });
-        }
 
         const subcommand = interaction.options.getSubcommand();
 
